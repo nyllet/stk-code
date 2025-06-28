@@ -19,7 +19,7 @@
 #include "physics/triangle_mesh.hpp"
 #include "tracks/track.hpp"
 
-void* btKartRaycaster::castRay(const btVector3& from, const btVector3& to,
+const void* btKartRaycaster::castRay(const btVector3& from, const btVector3& to,
                                btVehicleRaycasterResult& result)
 {
     // ========================================================================
@@ -63,7 +63,7 @@ void* btKartRaycaster::castRay(const btVector3& from, const btVector3& to,
 
     if (rayCallback.hasHit())
     {
-        btRigidBody* body = btRigidBody::upcast(rayCallback.m_collisionObject);
+        const btRigidBody* body = btRigidBody::upcast(rayCallback.m_collisionObject);
         if (body && body->hasContactResponse())
         {
             result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
@@ -79,8 +79,8 @@ void* btKartRaycaster::castRay(const btVector3& from, const btVector3& to,
             // different triangle mesh). TODO: Add a mapping from bullet
             // objects back to triangle meshes, so that it's easy to pick up
             // the right triangle mesh for smoothing
-            TriangleMesh::RigidBodyTriangleMesh *rbtm =
-                dynamic_cast<TriangleMesh::RigidBodyTriangleMesh*>(body);
+            const TriangleMesh::RigidBodyTriangleMesh *rbtm =
+                dynamic_cast<const TriangleMesh::RigidBodyTriangleMesh*>(body);
             if(m_smooth_normals &&
                 rayCallback.getTriangleIndex()>-1 &&
                 rbtm != NULL                         )

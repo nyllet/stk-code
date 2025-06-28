@@ -34,7 +34,6 @@ src/html
 *.o
 *.d
 *.a
-*.patch
 *.diff
 *.obj
 *.orig

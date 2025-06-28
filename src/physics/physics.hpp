@@ -176,12 +176,12 @@ public:
     /** Returns true if the debug drawer is enabled. */
     bool  isDebug() const     {return m_debug_drawer->debugEnabled(); }
     IrrDebugDrawer* getDebugDrawer() { return m_debug_drawer; }
-    virtual btScalar solveGroup(btCollisionObject** bodies, int numBodies,
+    btScalar solveGroup(btCollisionObject** bodies, int numBodies,
                                 btPersistentManifold** manifold,int numManifolds,
                                 btTypedConstraint** constraints,int numConstraints,
                                 const btContactSolverInfo& info,
-                                btIDebugDraw* debugDrawer, btStackAlloc* stackAlloc,
-                                btDispatcher* dispatcher);
+                                btIDebugDraw* debugDrawer,
+                                btDispatcher* dispatcher) override;
 };
 
 #endif // HEADER_PHYSICS_HPP

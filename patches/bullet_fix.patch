@@ -1,0 +1,45 @@
+diff --git a/src/BulletDynamics/Vehicle/btVehicleRaycaster.h b/src/BulletDynamics/Vehicle/btVehicleRaycaster.h
+index 1e97664d5..187cd9b86 100644
+--- a/src/BulletDynamics/Vehicle/btVehicleRaycaster.h
++++ b/src/BulletDynamics/Vehicle/btVehicleRaycaster.h
+@@ -25,6 +25,7 @@ struct btVehicleRaycaster
+ 		btVector3 m_hitPointInWorld;
+ 		btVector3 m_hitNormalInWorld;
+ 		btScalar m_distFraction;
++               int m_triangle_index;
+ 	};
+ 
+ 	virtual const void* castRay(const btVector3& from, const btVector3& to, btVehicleRaycasterResult& result) = 0;
+diff --git a/src/BulletDynamics/Vehicle/btWheelInfo.h b/src/BulletDynamics/Vehicle/btWheelInfo.h
+index 68f61423d..7c66551bf 100644
+--- a/src/BulletDynamics/Vehicle/btWheelInfo.h
++++ b/src/BulletDynamics/Vehicle/btWheelInfo.h
+@@ -47,6 +47,7 @@ struct btWheelInfo
+ 		btVector3 m_wheelAxleWS;       // axle in worldspace
+ 		bool m_isInContact;
+ 		void* m_groundObject;  //could be general void* ptr
++               int m_triangle_index;
+ 	};
+ 
+ 	RaycastInfo m_raycastInfo;
+@@ -111,6 +112,7 @@ struct btWheelInfo
+ 	//calculated by suspension
+ 	btScalar m_wheelsSuspensionForce;
+ 	btScalar m_skidInfo;
++       bool m_was_on_ground;
+ };
+ 
+ #endif  //BT_WHEEL_INFO_H
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index c30125c53..995b78fdd 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -4,7 +4,7 @@ IF(BUILD_BULLET3)
+ ENDIF(BUILD_BULLET3)
+ 
+ 
+-SUBDIRS(   BulletInverseDynamics BulletSoftBody BulletCollision BulletDynamics LinearMath Bullet3Common)
++SUBDIRS(   BulletCollision BulletDynamics LinearMath)
+ 
+ 
+ IF(INSTALL_LIBS)

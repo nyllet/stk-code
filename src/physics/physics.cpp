@@ -575,7 +575,6 @@ btScalar Physics::solveGroup(btCollisionObject** bodies, int numBodies,
                              int numConstraints,
                              const btContactSolverInfo& info,
                              btIDebugDraw* debugDrawer,
-                             btStackAlloc* stackAlloc,
                              btDispatcher* dispatcher)
 {
     btScalar returnValue=
@@ -584,7 +583,6 @@ btScalar Physics::solveGroup(btCollisionObject** bodies, int numBodies,
                                                         constraints,
                                                         numConstraints, info,
                                                         debugDrawer,
-                                                        stackAlloc,
                                                         dispatcher);
     int currentNumManifolds = m_dispatcher->getNumManifolds();
     // We can't explode a rocket in a loop, since a rocket might collide with

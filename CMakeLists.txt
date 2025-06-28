@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.12...4.0)
+cmake_minimum_required(VERSION 3.24)
+cmake_policy(SET CMP0169 NEW)  # Optional, explicit if >= 3.29
 
 # root CMakeLists for the SuperTuxKart project
 project(SuperTuxKart)
@@ -210,9 +211,33 @@ if(UNIX AND NOT APPLE AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
     endif()
 endif()
 
-# Build the Bullet physics library
-add_subdirectory("${PROJECT_SOURCE_DIR}/lib/bullet")
-include_directories(BEFORE "${PROJECT_SOURCE_DIR}/lib/bullet/src")
+# Fetch and build the Bullet physics library
+include(FetchContent)
+
+# Bullet build customization (disable unneeded components)
+set(BUILD_BULLET2_DEMOS OFF CACHE BOOL "No demos" FORCE)
+set(BUILD_CPU_DEMOS OFF CACHE BOOL "No CPU demos" FORCE)
+set(BUILD_OPENGL3_DEMOS OFF CACHE BOOL "No OpenGL3 demos" FORCE)
+set(BUILD_UNIT_TESTS OFF CACHE BOOL "No tests" FORCE)
+set(BUILD_EXTRAS OFF CACHE BOOL "No extras" FORCE)
+set(BUILD_BULLET3 OFF CACHE BOOL "No Bullet3 (GPU stuff)" FORCE)
+set(BT_ENABLE_TRIANGLE_MESH ON CACHE BOOL "Enable Bullet triangle mesh" FORCE)
+
+# Path to your patch file
+set(BULLET_PATCH_FILE "${CMAKE_SOURCE_DIR}/patches/bullet_fix.patch")
+
+FetchContent_Declare(
+  bullet
+  GIT_REPOSITORY https://github.com/bulletphysics/bullet3.git
+  GIT_TAG master
+  PATCH_COMMAND
+    ${CMAKE_COMMAND} -E echo "⚙️  Applying Bullet patch..." &&
+    ${CMAKE_COMMAND} -E sleep 0.1 &&
+    ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < "${BULLET_PATCH_FILE}"
+)
+
+set(BT_ENABLE_SERIALIZER ON CACHE BOOL "Enable Bullet serialization" FORCE)
+FetchContent_MakeAvailable(bullet)
 
 # Build the DNS C library
 if(USE_DNS_C)
@@ -625,6 +650,23 @@ else()
     endif()
 endif()
 
+add_library(bullet_headers INTERFACE)
+target_include_directories(bullet_headers INTERFACE
+    ${bullet_SOURCE_DIR}/src
+    ${bullet_SOURCE_DIR}/src/LinearMath
+    ${bullet_SOURCE_DIR}/src/BulletCollision
+    ${bullet_SOURCE_DIR}/src/BulletDynamics
+)
+
+target_include_directories(supertuxkart
+        SYSTEM PRIVATE
+        ${bullet_SOURCE_DIR}/src
+        ${bullet_SOURCE_DIR}/src/LinearMath
+        ${bullet_SOURCE_DIR}/src/BulletCollision
+        ${bullet_SOURCE_DIR}/src/BulletDynamics
+)
+
+
 # check if linking against libatomic is required
 include(CheckCXXSourceCompiles)
 check_cxx_source_compiles("
@@ -674,15 +716,15 @@ endif()
 
 # Common library dependencies
 target_link_libraries(supertuxkart
-    bulletdynamics
-    bulletcollision
-    bulletmath
+    BulletDynamics
+    BulletCollision
+    LinearMath
     ${ENET_LIBRARIES}
     stkirrlicht
     ${Angelscript_LIBRARIES}
     ${CURL_LIBRARIES}
     ${MCPP_LIBRARY}
-    )
+)
 
 if (USE_SWITCH)
   include(cmake/FindEGL.cmake)

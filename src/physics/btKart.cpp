@@ -79,7 +79,7 @@ btWheelInfo& btKart::addWheel(const btVector3& connectionPointCS,
     ci.m_wheelsDampingCompression = tuning.m_suspensionCompression;
     ci.m_wheelsDampingRelaxation  = tuning.m_suspensionDamping;
     ci.m_frictionSlip             = tuning.m_frictionSlip;
-    ci.m_maxSuspensionTravel      = tuning.m_maxSuspensionTravel;
+    ci.m_maxSuspensionTravelCm    = tuning.m_maxSuspensionTravel;
     ci.m_maxSuspensionForce       = tuning.m_maxSuspensionForce;
 
     m_wheelInfo.push_back( btWheelInfo(ci));
@@ -264,7 +264,7 @@ btScalar btKart::rayCast(unsigned int index, float fraction)
     updateWheelTransformsWS(wheel, getChassisWorldTransform(), false, fraction);
 
     btScalar max_susp_len = wheel.getSuspensionRestLength()
-                          + wheel.m_maxSuspensionTravel;
+                          + wheel.m_maxSuspensionTravelCm;
 
     // Do a slightly longer raycast to see if the kart might soon hit the 
     // ground and some 'cushioning' is needed to avoid that the chassis
@@ -280,7 +280,7 @@ btScalar btKart::rayCast(unsigned int index, float fraction)
 
     btAssert(m_vehicleRaycaster);
 
-    void* object = m_vehicleRaycaster->castRay(source,target,rayResults);
+    const void* object = m_vehicleRaycaster->castRay(source,target,rayResults);
 
     wheel.m_raycastInfo.m_groundObject = 0;
 
@@ -298,9 +298,9 @@ btScalar btKart::rayCast(unsigned int index, float fraction)
 
         //clamp on max suspension travel
         btScalar minSuspensionLength = wheel.getSuspensionRestLength()
-                                - wheel.m_maxSuspensionTravel;
+                                - wheel.m_maxSuspensionTravelCm;
         btScalar maxSuspensionLength = wheel.getSuspensionRestLength()
-                                + wheel.m_maxSuspensionTravel;
+                                + wheel.m_maxSuspensionTravelCm;
         if (wheel.m_raycastInfo.m_suspensionLength < minSuspensionLength)
         {
             wheel.m_raycastInfo.m_suspensionLength = minSuspensionLength;
@@ -383,7 +383,7 @@ void btKart::getVisualContactPoint(const btTransform& chassis_trans,
         btWheelInfo &wheel = m_wheelInfo[index];
         updateWheelTransformsWS(wheel, chassis_trans, false);
         btScalar max_susp_len = wheel.getSuspensionRestLength()
-                              + wheel.m_maxSuspensionTravel;
+                              + wheel.m_maxSuspensionTravelCm;
 
         // Do a slightly longer raycast to see if the kart might soon hit the 
         // ground and some 'cushioning' is needed to avoid that the chassis
@@ -396,7 +396,7 @@ void btKart::getVisualContactPoint(const btTransform& chassis_trans,
         btVector3 target = source + rayvector;
         btVehicleRaycaster::btVehicleRaycasterResult rayResults;
 
-        void* object = m_vehicleRaycaster->castRay(source, target, rayResults);
+        const void* object = m_vehicleRaycaster->castRay(source, target, rayResults);
         if(index == 2) *left  = rayResults.m_hitPointInWorld;
         else           *right = rayResults.m_hitPointInWorld;
         m_visual_wheels_touch_ground &= (object != NULL);
@@ -1009,7 +1009,7 @@ btScalar btKart::rayCast(btWheelInfo& wheel, const btVector3& ray)
 
     assert(m_vehicleRaycaster);
 
-    void* object = m_vehicleRaycaster->castRay(source,target,rayResults);
+    const void* object = m_vehicleRaycaster->castRay(source,target,rayResults);
 
     wheel.m_raycastInfo.m_groundObject = 0;
 
